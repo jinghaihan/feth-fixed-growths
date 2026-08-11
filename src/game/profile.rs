@@ -7,6 +7,8 @@ pub const BUILD_ID_1_2_0: [u8; 0x20] = [
 
 pub const UNIT_LEVEL_UP_OFFSET: usize = 0x003D_3020;
 pub const UNIT_ABILITY_PARAMETER_OFFSET: usize = 0x000A_7E80;
+pub const GET_UNIT_FROM_SAVE_OFFSET: usize = 0x003C_AF30;
+pub const SAVE_DATA_OFFSET: usize = 0x01B1_2190;
 pub const PERSON_TABLE_OFFSET: usize = 0x01B3_87E8;
 pub const CLASS_TABLE_OFFSET: usize = 0x01B3_8798;
 
