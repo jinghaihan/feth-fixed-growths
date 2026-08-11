@@ -38,6 +38,8 @@ fn unit_level_up_hook(unit: *mut Unit, target_level: i32) {
     return;
   }
 
+  // SAFETY: NonNull validated the hook argument. The adapter validates all
+  // table lookups and persistent-unit pointers before dereferencing them.
   if unsafe { try_apply_fixed_growths(unit, target_level_byte) } {
     return;
   }
@@ -49,11 +51,13 @@ fn clear_growth_state(unit: NonNull<Unit>) {
   let Some(runtime) = Runtime::detect() else {
     return;
   };
+  // SAFETY: the hook supplied this live Unit pointer and NonNull validated it.
   let character = unsafe { unit.as_ref().character };
   let Some(mut save_unit) = runtime.save_unit(character) else {
     return;
   };
 
+  // SAFETY: save_unit returned a live persistent Unit for this character.
   unsafe {
     PersistedGrowthState::clear(&mut save_unit.as_mut().class_level);
   }
@@ -64,6 +68,8 @@ unsafe fn try_apply_fixed_growths(mut unit: NonNull<Unit>, target_level: u8) -> 
     return false;
   };
 
+  // SAFETY: the hook supplied a live Unit pointer and keeps it alive for the
+  // duration of this synchronous adapter call.
   let (character, class, current_level, current_stats) = {
     let unit = unsafe { unit.as_ref() };
     (unit.character, unit.class, unit.level, unit.current_stats())
@@ -78,9 +84,13 @@ unsafe fn try_apply_fixed_growths(mut unit: NonNull<Unit>, target_level: u8) -> 
     return false;
   };
 
+  // SAFETY: Runtime checked the table indexes and rejected null entries. The
+  // supported profile fixes the entry layouts used by these shared borrows.
   let personal_growths = unsafe { person.as_ref().personal_growths() };
   let class_growths = unsafe { class_data.as_ref().class_growths() };
   let caps = unsafe { person.as_ref().stat_caps() };
+  // SAFETY: Runtime returned the persistent Unit for the same character; this
+  // immutable read completes before any later mutable borrow.
   let persisted = unsafe { PersistedGrowthState::load(&save_unit.as_ref().class_level) }
     .filter(|state| state.is_plausible_for(caps));
   let ability_bonus = clamp_i32_to_i16(runtime.growth_bonus(unit));
@@ -100,15 +110,20 @@ unsafe fn try_apply_fixed_growths(mut unit: NonNull<Unit>, target_level: u8) -> 
   ) {
     LevelUpDecision::NoChange => false,
     LevelUpDecision::RestoreCached { stats } => {
+      // SAFETY: the hook-owned Unit is still live and stats passed cap checks.
       unsafe {
         unit.as_mut().apply_level_up(target_level, stats);
       }
       true
     }
     LevelUpDecision::Apply { result, state } => {
+      // SAFETY: save_unit is a live persistent Unit and store writes only the
+      // documented class_level[60..81] range.
       if unsafe { state.store(&mut save_unit.as_mut().class_level) }.is_err() {
         return false;
       }
+      // SAFETY: the hook-owned Unit is still live and the core bounded stats by
+      // the validated character caps.
       unsafe {
         unit.as_mut().apply_level_up(target_level, result.stats);
       }

@@ -50,9 +50,13 @@ pub fn decide_level_up(
   sources: GrowthSources,
   persisted: Option<PersistedGrowthState>,
 ) -> LevelUpDecision {
-  if let Some(state) = persisted {
-    if let Some(stats) = state.cached_stats_for(target_level) {
-      return LevelUpDecision::RestoreCached { stats };
+  // A level-1 unit may still contain bytes copied from an older run. Recomputing
+  // level 2 from the personal-growth seed is deterministic and replaces them.
+  if current_level > 1 {
+    if let Some(state) = persisted {
+      if let Some(stats) = state.cached_stats_for(target_level) {
+        return LevelUpDecision::RestoreCached { stats };
+      }
     }
   }
 
@@ -176,6 +180,23 @@ mod tests {
       panic!("expected an applied level up");
     };
     assert_eq!(result.gains, [0; STAT_COUNT]);
+    assert_eq!(state.accumulated_points, [80; STAT_COUNT]);
+  }
+
+  #[test]
+  fn does_not_restore_a_level_two_cache_for_a_fresh_unit() {
+    let stale = PersistedGrowthState {
+      last_target_level: 2,
+      accumulated_points: [75; STAT_COUNT],
+      cached_stats: [40; STAT_COUNT],
+    };
+
+    let decision = decide_level_up(1, 2, [10; STAT_COUNT], sources(35, 10, 0), Some(stale));
+
+    let LevelUpDecision::Apply { result, state } = decision else {
+      panic!("expected a freshly calculated level up");
+    };
+    assert_eq!(result.stats, [10; STAT_COUNT]);
     assert_eq!(state.accumulated_points, [80; STAT_COUNT]);
   }
 }
