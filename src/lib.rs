@@ -3,7 +3,7 @@
 pub mod game;
 pub mod growth;
 
-#[cfg(target_os = "horizon")]
+#[cfg(target_os = "switch")]
 #[skyline::main(name = "feth_fixed_growths")]
 pub fn skyline_main() {
   println!("[feth-fixed-growths] initialized");
