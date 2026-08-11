@@ -2,6 +2,7 @@
 
 pub mod game;
 pub mod growth;
+pub mod level_up;
 pub mod persistence;
 
 #[cfg(target_os = "switch")]
