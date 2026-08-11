@@ -6,6 +6,8 @@ pub const CACHED_STATS_START_SLOT: usize = 71;
 pub const STORAGE_END_SLOT: usize = 81;
 
 const MAX_ACCUMULATED_POINTS: u16 = 99;
+const MIN_PERSISTED_LEVEL: u8 = 2;
+const MAX_PERSISTED_LEVEL: u8 = 99;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct PersistedGrowthState {
@@ -22,13 +24,16 @@ pub enum StorageError {
 impl PersistedGrowthState {
   pub fn load(class_level: &[u8; 100]) -> Option<Self> {
     let last_target_level = class_level[LAST_TARGET_LEVEL_SLOT];
-    if last_target_level == 0 {
+    if !(MIN_PERSISTED_LEVEL..=MAX_PERSISTED_LEVEL).contains(&last_target_level) {
       return None;
     }
 
     let mut accumulated_points = [0; STAT_COUNT];
     for (stat, points) in accumulated_points.iter_mut().enumerate() {
       *points = u16::from(class_level[ACCUMULATOR_START_SLOT + stat]);
+      if *points > MAX_ACCUMULATED_POINTS {
+        return None;
+      }
     }
 
     let mut cached_stats = [0; STAT_COUNT];
@@ -104,6 +109,19 @@ mod tests {
   #[test]
   fn treats_zero_last_target_level_as_uninitialized() {
     assert_eq!(PersistedGrowthState::load(&[0; 100]), None);
+  }
+
+  #[test]
+  fn rejects_values_that_cannot_be_plugin_state() {
+    let mut class_level = [0; 100];
+    state().store(&mut class_level).unwrap();
+
+    class_level[LAST_TARGET_LEVEL_SLOT] = 1;
+    assert_eq!(PersistedGrowthState::load(&class_level), None);
+
+    class_level[LAST_TARGET_LEVEL_SLOT] = 12;
+    class_level[ACCUMULATOR_START_SLOT + 4] = 100;
+    assert_eq!(PersistedGrowthState::load(&class_level), None);
   }
 
   #[test]

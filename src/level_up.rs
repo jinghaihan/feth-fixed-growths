@@ -53,6 +53,7 @@ pub fn decide_level_up(
   }
 
   let mut accumulated_points = persisted
+    .filter(|state| state.last_target_level == current_level)
     .map(|state| state.accumulated_points)
     .unwrap_or_else(|| sources.personal.map(initial_points_from_personal_growth));
   let result = advance_to_level(
@@ -146,5 +147,22 @@ mod tests {
       decide_level_up(10, 9, [20; STAT_COUNT], sources(50, 10, 0), None,),
       LevelUpDecision::NoChange,
     );
+  }
+
+  #[test]
+  fn reinitializes_points_when_saved_state_is_from_another_run() {
+    let stale = PersistedGrowthState {
+      last_target_level: 40,
+      accumulated_points: [99; STAT_COUNT],
+      cached_stats: [50; STAT_COUNT],
+    };
+
+    let decision = decide_level_up(1, 2, [10; STAT_COUNT], sources(35, 10, 0), Some(stale));
+
+    let LevelUpDecision::Apply { result, state } = decision else {
+      panic!("expected an applied level up");
+    };
+    assert_eq!(result.gains, [0; STAT_COUNT]);
+    assert_eq!(state.accumulated_points, [80; STAT_COUNT]);
   }
 }
