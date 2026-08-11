@@ -1,3 +1,6 @@
+#![deny(unsafe_op_in_unsafe_fn)]
+
+pub mod game;
 pub mod growth;
 
 #[cfg(target_os = "horizon")]
