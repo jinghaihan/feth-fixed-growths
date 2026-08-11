@@ -81,7 +81,8 @@ unsafe fn try_apply_fixed_growths(mut unit: NonNull<Unit>, target_level: u8) -> 
   let personal_growths = unsafe { person.as_ref().personal_growths() };
   let class_growths = unsafe { class_data.as_ref().class_growths() };
   let caps = unsafe { person.as_ref().stat_caps() };
-  let persisted = unsafe { PersistedGrowthState::load(&save_unit.as_ref().class_level) };
+  let persisted = unsafe { PersistedGrowthState::load(&save_unit.as_ref().class_level) }
+    .filter(|state| state.is_plausible_for(caps));
   let ability_bonus = clamp_i32_to_i16(runtime.growth_bonus(unit));
   let sources = GrowthSources {
     personal: personal_growths,

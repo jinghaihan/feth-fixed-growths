@@ -68,6 +68,15 @@ impl PersistedGrowthState {
     (self.last_target_level == target_level).then_some(self.cached_stats)
   }
 
+  pub fn is_plausible_for(self, stat_caps: [u8; STAT_COUNT]) -> bool {
+    self.cached_stats[0] > 0
+      && self
+        .cached_stats
+        .iter()
+        .zip(stat_caps)
+        .all(|(stat, cap)| *stat <= cap)
+  }
+
   pub fn clear(class_level: &mut [u8; 100]) {
     class_level[LAST_TARGET_LEVEL_SLOT..STORAGE_END_SLOT].fill(0);
   }
@@ -128,6 +137,20 @@ mod tests {
   fn returns_cached_stats_only_for_the_same_target_level() {
     assert_eq!(state().cached_stats_for(12), Some(state().cached_stats));
     assert_eq!(state().cached_stats_for(13), None);
+  }
+
+  #[test]
+  fn validates_cached_stats_against_character_caps() {
+    let valid = state();
+    assert!(valid.is_plausible_for([99; STAT_COUNT]));
+
+    let mut zero_hp = valid;
+    zero_hp.cached_stats[0] = 0;
+    assert!(!zero_hp.is_plausible_for([99; STAT_COUNT]));
+
+    let mut over_cap = valid;
+    over_cap.cached_stats[3] = 31;
+    assert!(!over_cap.is_plausible_for([30; STAT_COUNT]));
   }
 
   #[test]

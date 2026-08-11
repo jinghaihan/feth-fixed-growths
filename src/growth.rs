@@ -16,7 +16,7 @@ pub struct LevelUpResult {
 }
 
 pub fn initial_points_from_personal_growth(personal_growth: i16) -> u16 {
-  personal_growth.max(0) as u16
+  (u32::from(personal_growth.max(0) as u16) % POINTS_PER_GAIN) as u16
 }
 
 pub fn advance_stat(
@@ -102,6 +102,8 @@ mod tests {
     assert_eq!(initial_points_from_personal_growth(45), 45);
     assert_eq!(initial_points_from_personal_growth(0), 0);
     assert_eq!(initial_points_from_personal_growth(-10), 0);
+    assert_eq!(initial_points_from_personal_growth(100), 0);
+    assert_eq!(initial_points_from_personal_growth(135), 35);
   }
 
   #[test]
