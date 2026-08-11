@@ -18,7 +18,7 @@ pub fn install() {
 
 #[skyline::hook(offset = profile::UNIT_LEVEL_UP_OFFSET)]
 fn unit_level_up_hook(unit: *mut Unit, target_level: i32) {
-  let Some(mut unit) = NonNull::new(unit) else {
+  let Some(unit) = NonNull::new(unit) else {
     call_original!(unit, target_level);
     return;
   };

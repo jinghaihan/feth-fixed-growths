@@ -19,6 +19,13 @@ impl Runtime {
     if skyline::info::get_program_id() != profile::TITLE_ID {
       return None;
     }
+    let mut display_version = skyline::nn::oe::DisplayVersion { name: [0; 16] };
+    unsafe {
+      skyline::nn::oe::GetDisplayVersion(&mut display_version);
+    }
+    if !profile::is_supported_display_version(&display_version.name) {
+      return None;
+    }
 
     let text_base = NonNull::new(unsafe {
       skyline::hooks::getRegionAddress(skyline::hooks::Region::Text).cast::<u8>()

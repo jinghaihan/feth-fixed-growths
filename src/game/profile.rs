@@ -1,4 +1,5 @@
 pub const TITLE_ID: u64 = 0x0100_55D0_09F7_8000;
+pub const DISPLAY_VERSION_1_2_0: &[u8] = b"1.2.0";
 
 pub const BUILD_ID_1_2_0: [u8; 0x20] = [
   0x89, 0x04, 0x84, 0x49, 0xBA, 0x23, 0x8C, 0x8C, 0xF5, 0x65, 0x51, 0x8B, 0x83, 0xBF, 0x02, 0xD3,
@@ -16,3 +17,28 @@ pub const PERSON_COUNT: usize = 1201;
 pub const CLASS_COUNT: usize = 100;
 pub const GROWTH_BONUS_ABILITY_PARAMETER: i32 = 0x3A;
 pub const MAX_LEVEL: u8 = 99;
+
+pub fn is_supported_display_version(display_version: &[u8; 16]) -> bool {
+  let length = display_version
+    .iter()
+    .position(|byte| *byte == 0)
+    .unwrap_or(display_version.len());
+  &display_version[..length] == DISPLAY_VERSION_1_2_0
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn accepts_only_the_1_2_0_display_version() {
+    let mut supported = [0; 16];
+    supported[..DISPLAY_VERSION_1_2_0.len()].copy_from_slice(DISPLAY_VERSION_1_2_0);
+
+    assert!(is_supported_display_version(&supported));
+    assert!(!is_supported_display_version(
+      b"1.1.1\0\0\0\0\0\0\0\0\0\0\0"
+    ));
+    assert!(!is_supported_display_version(b"1.2.0-extra\0\0\0\0\0"));
+  }
+}
