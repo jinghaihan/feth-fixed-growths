@@ -25,6 +25,13 @@ pub fn advance_stat(
   current_stat: u8,
   stat_cap: u8,
 ) -> GrowthStep {
+  if current_stat >= stat_cap {
+    return GrowthStep {
+      gain: 0,
+      remaining_points: accumulated_points,
+    };
+  }
+
   let effective_growth = growth_rate.max(0) as u32;
   let total_points = u32::from(accumulated_points) + effective_growth;
   let available_gains = stat_cap.saturating_sub(current_stat);
@@ -160,7 +167,21 @@ mod tests {
       advance_stat(90, 50, 20, 20),
       GrowthStep {
         gain: 0,
-        remaining_points: 40
+        remaining_points: 90
+      },
+    );
+  }
+
+  #[test]
+  fn resumes_frozen_points_if_a_later_class_raises_the_cap() {
+    let capped = advance_stat(90, 50, 20, 20);
+    let raised_cap = advance_stat(capped.remaining_points, 50, 20, 21);
+
+    assert_eq!(
+      raised_cap,
+      GrowthStep {
+        gain: 1,
+        remaining_points: 40,
       },
     );
   }
