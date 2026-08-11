@@ -99,6 +99,13 @@
   user explicitly requests it.
 - Do not push commits, create tags, or publish releases unless explicitly
   requested.
+- Keep `VERSION`, the Cargo package version, and release tags synchronized.
+  Release tags use `v<VERSION>`.
+- Prepare releases with `uv run tools/release.py`; it must verify both host and
+  Skyline builds before explicitly pushing `main` and the selected tag.
+- Tagged releases must include the standalone NRO, an installable Atmosphere
+  ZIP, and checksums. Never trigger the release workflow before the exact CI
+  artifact has passed the real-hardware test plan.
 
 ## Documentation
 
