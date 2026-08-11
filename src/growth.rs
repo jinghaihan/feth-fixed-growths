@@ -7,6 +7,13 @@ pub struct GrowthStep {
   pub remaining_points: u16,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct LevelUpResult {
+  pub levels_gained: u8,
+  pub gains: [u8; STAT_COUNT],
+  pub stats: [u8; STAT_COUNT],
+}
+
 pub fn initial_points_from_personal_growth(personal_growth: i16) -> u16 {
   personal_growth.max(0) as u16
 }
@@ -49,6 +56,33 @@ pub fn advance_level(
   }
 
   gains
+}
+
+pub fn advance_to_level(
+  current_level: u8,
+  target_level: u8,
+  accumulated_points: &mut [u16; STAT_COUNT],
+  growth_rates: [i16; STAT_COUNT],
+  current_stats: [u8; STAT_COUNT],
+  stat_caps: [u8; STAT_COUNT],
+) -> LevelUpResult {
+  let levels_gained = target_level.saturating_sub(current_level);
+  let mut stats = current_stats;
+  let mut total_gains = [0_u8; STAT_COUNT];
+
+  for _ in 0..levels_gained {
+    let gains = advance_level(accumulated_points, growth_rates, stats, stat_caps);
+    for stat in 0..STAT_COUNT {
+      stats[stat] = stats[stat].saturating_add(gains[stat]);
+      total_gains[stat] = total_gains[stat].saturating_add(gains[stat]);
+    }
+  }
+
+  LevelUpResult {
+    levels_gained,
+    gains: total_gains,
+    stats,
+  }
 }
 
 #[cfg(test)]
@@ -141,5 +175,62 @@ mod tests {
 
     assert_eq!(gains, [1, 0, 2, 0, 0, 0, 1, 0, 1, 0]);
     assert_eq!(points, [0, 0, 0, 99, 0, 50, 0, 25, 0, 1]);
+  }
+
+  #[test]
+  fn advances_once_for_each_new_level() {
+    let mut points = [0; STAT_COUNT];
+    points[0] = initial_points_from_personal_growth(35);
+    let mut growth_rates = [0; STAT_COUNT];
+    growth_rates[0] = 45;
+
+    let result = advance_to_level(
+      1,
+      3,
+      &mut points,
+      growth_rates,
+      [10; STAT_COUNT],
+      [99; STAT_COUNT],
+    );
+
+    assert_eq!(result.levels_gained, 2);
+    assert_eq!(result.gains[0], 1);
+    assert_eq!(result.stats[0], 11);
+    assert_eq!(points[0], 25);
+  }
+
+  #[test]
+  fn does_not_reapply_an_already_reached_level() {
+    let mut points = [50; STAT_COUNT];
+    let result = advance_to_level(
+      10,
+      10,
+      &mut points,
+      [100; STAT_COUNT],
+      [20; STAT_COUNT],
+      [99; STAT_COUNT],
+    );
+
+    assert_eq!(result.levels_gained, 0);
+    assert_eq!(result.gains, [0; STAT_COUNT]);
+    assert_eq!(result.stats, [20; STAT_COUNT]);
+    assert_eq!(points, [50; STAT_COUNT]);
+  }
+
+  #[test]
+  fn checks_caps_after_each_level() {
+    let mut points = [90; STAT_COUNT];
+    let result = advance_to_level(
+      1,
+      4,
+      &mut points,
+      [250; STAT_COUNT],
+      [19; STAT_COUNT],
+      [20; STAT_COUNT],
+    );
+
+    assert_eq!(result.gains, [1; STAT_COUNT]);
+    assert_eq!(result.stats, [20; STAT_COUNT]);
+    assert_eq!(points, [40; STAT_COUNT]);
   }
 }
