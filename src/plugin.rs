@@ -7,8 +7,8 @@ use crate::{
 };
 
 pub fn install() {
-  if Runtime::detect().is_none() {
-    println!("[feth-fixed-growths] unsupported title; hook not installed");
+  if !Runtime::initialize() {
+    println!("[feth-fixed-growths] unsupported game profile; hook not installed");
     return;
   }
 
@@ -48,7 +48,7 @@ fn unit_level_up_hook(unit: *mut Unit, target_level: i32) {
 }
 
 fn clear_growth_state(unit: NonNull<Unit>) {
-  let Some(runtime) = Runtime::detect() else {
+  let Some(runtime) = Runtime::get() else {
     return;
   };
   // SAFETY: the hook supplied this live Unit pointer and NonNull validated it.
@@ -64,7 +64,7 @@ fn clear_growth_state(unit: NonNull<Unit>) {
 }
 
 unsafe fn try_apply_fixed_growths(mut unit: NonNull<Unit>, target_level: u8) -> bool {
-  let Some(runtime) = Runtime::detect() else {
+  let Some(runtime) = Runtime::get() else {
     return false;
   };
 

@@ -1,4 +1,9 @@
-use core::{ffi::c_void, mem, ptr::NonNull};
+use core::{
+  ffi::c_void,
+  mem,
+  ptr::NonNull,
+  sync::atomic::{AtomicUsize, Ordering},
+};
 
 use super::{
   layout::{ClassData, PersonData, Unit},
@@ -9,13 +14,28 @@ use super::{
 type GetUnitFromSave = unsafe extern "C" fn(*mut c_void, u32) -> *mut Unit;
 type GetUnitAbilityParameter = unsafe extern "C" fn(*mut Unit, i32) -> i32;
 
+static INITIALIZED_TEXT_BASE: AtomicUsize = AtomicUsize::new(0);
+
 #[derive(Clone, Copy)]
 pub struct Runtime {
   text_base: NonNull<u8>,
 }
 
 impl Runtime {
-  pub fn detect() -> Option<Self> {
+  pub fn initialize() -> bool {
+    let Some(runtime) = Self::detect() else {
+      return false;
+    };
+    INITIALIZED_TEXT_BASE.store(runtime.text_base.as_ptr() as usize, Ordering::Release);
+    true
+  }
+
+  pub fn get() -> Option<Self> {
+    let text_base = INITIALIZED_TEXT_BASE.load(Ordering::Acquire) as *mut u8;
+    NonNull::new(text_base).map(|text_base| Self { text_base })
+  }
+
+  fn detect() -> Option<Self> {
     if skyline::info::get_program_id() != profile::TITLE_ID {
       return None;
     }
@@ -26,6 +46,9 @@ impl Runtime {
       skyline::nn::oe::GetDisplayVersion(&mut display_version);
     }
     if !profile::is_supported_display_version(&display_version.name) {
+      return None;
+    }
+    if !main_module_has_supported_build_id() {
       return None;
     }
 
@@ -112,4 +135,30 @@ impl Runtime {
     let data_pointer_address = unsafe { table.add(data_pointer_offset) }.cast::<*mut T>();
     NonNull::new(unsafe { data_pointer_address.read() })
   }
+}
+
+fn main_module_has_supported_build_id() -> bool {
+  let region_starts = [
+    skyline::hooks::Region::Text,
+    skyline::hooks::Region::Rodata,
+    skyline::hooks::Region::Data,
+    skyline::hooks::Region::Bss,
+  ]
+  .map(|region| {
+    // SAFETY: Skyline returns the mapped main-module boundary for each region.
+    unsafe { skyline::hooks::getRegionAddress(region).cast::<u8>() }
+  });
+
+  region_starts.windows(2).any(|bounds| {
+    let start = bounds[0] as usize;
+    let end = bounds[1] as usize;
+    if start == 0 || end <= start {
+      return false;
+    }
+
+    // SAFETY: adjacent Skyline region boundaries describe one readable mapped
+    // main-module segment, and the ordering check prevents length underflow.
+    let region = unsafe { core::slice::from_raw_parts(bounds[0], end - start) };
+    profile::contains_supported_build_id(region)
+  })
 }

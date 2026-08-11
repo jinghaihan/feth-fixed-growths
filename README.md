@@ -31,8 +31,8 @@ range.
 
 3. Fully restart the game and load Fire Emblem: Three Houses 1.2.0.
 
-The plugin checks both the title ID and display version before installing its
-hook. Unsupported versions are left unchanged.
+The plugin checks the title ID, display version, and main executable Build ID
+before installing its hook. Unsupported versions are left unchanged.
 
 ## Behavior
 

@@ -6,6 +6,11 @@ pub const BUILD_ID_1_2_0: [u8; 0x20] = [
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 ];
 
+const GNU_BUILD_ID_NOTE_PREFIX: [u8; 16] = [
+  0x04, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, b'G', b'N', b'U', 0,
+];
+const ACTIVE_BUILD_ID_LENGTH: usize = 16;
+
 pub const UNIT_LEVEL_UP_OFFSET: usize = 0x003D_3020;
 pub const UNIT_ABILITY_PARAMETER_OFFSET: usize = 0x000A_7E80;
 pub const GET_UNIT_FROM_SAVE_OFFSET: usize = 0x003C_AF30;
@@ -26,6 +31,15 @@ pub fn is_supported_display_version(display_version: &[u8; 16]) -> bool {
   &display_version[..length] == DISPLAY_VERSION_1_2_0
 }
 
+pub fn contains_supported_build_id(region: &[u8]) -> bool {
+  const NOTE_LENGTH: usize = GNU_BUILD_ID_NOTE_PREFIX.len() + ACTIVE_BUILD_ID_LENGTH;
+
+  region.windows(NOTE_LENGTH).any(|window| {
+    window[..GNU_BUILD_ID_NOTE_PREFIX.len()] == GNU_BUILD_ID_NOTE_PREFIX
+      && window[GNU_BUILD_ID_NOTE_PREFIX.len()..] == BUILD_ID_1_2_0[..ACTIVE_BUILD_ID_LENGTH]
+  })
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -40,5 +54,18 @@ mod tests {
       b"1.1.1\0\0\0\0\0\0\0\0\0\0\0"
     ));
     assert!(!is_supported_display_version(b"1.2.0-extra\0\0\0\0\0"));
+  }
+
+  #[test]
+  fn finds_the_1_2_0_gnu_build_id_note() {
+    let mut region = [0xCC; 48];
+    region[5..21].copy_from_slice(&GNU_BUILD_ID_NOTE_PREFIX);
+    region[21..37].copy_from_slice(&BUILD_ID_1_2_0[..ACTIVE_BUILD_ID_LENGTH]);
+
+    assert!(contains_supported_build_id(&region));
+
+    region[24] ^= 0xFF;
+    assert!(!contains_supported_build_id(&region));
+    assert!(!contains_supported_build_id(&region[..31]));
   }
 }
