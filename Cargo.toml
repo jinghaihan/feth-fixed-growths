@@ -1,0 +1,20 @@
+[package]
+name = "feth-fixed-growths"
+version = "0.1.0"
+edition = "2021"
+
+[package.metadata.skyline]
+titleid = "010055D009F78000"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+skyline = { git = "https://github.com/ultimate-research/skyline-rs.git", rev = "6b52d321275639f26c2371d8142550ba0013a5e4" }
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+lto = true
