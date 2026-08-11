@@ -2,6 +2,7 @@
 
 pub mod game;
 pub mod growth;
+pub mod persistence;
 
 #[cfg(target_os = "switch")]
 #[skyline::main(name = "feth_fixed_growths")]
