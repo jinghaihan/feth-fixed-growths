@@ -2,6 +2,9 @@
 name = "feth-fixed-growths"
 version = "0.1.0"
 edition = "2021"
+description = "Fixed growths for Fire Emblem: Three Houses"
+license = "MIT"
+repository = "https://github.com/jinghaihan/feth-fixed-growths"
 
 [package.metadata.skyline]
 titleid = "010055D009F78000"
