@@ -15,3 +15,4 @@ pub const CLASS_TABLE_OFFSET: usize = 0x01B3_8798;
 pub const PERSON_COUNT: usize = 1201;
 pub const CLASS_COUNT: usize = 100;
 pub const GROWTH_BONUS_ABILITY_PARAMETER: i32 = 0x3A;
+pub const MAX_LEVEL: u8 = 99;

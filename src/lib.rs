@@ -6,7 +6,10 @@ pub mod level_up;
 pub mod persistence;
 
 #[cfg(target_os = "switch")]
+mod plugin;
+
+#[cfg(target_os = "switch")]
 #[skyline::main(name = "feth_fixed_growths")]
 pub fn skyline_main() {
-  println!("[feth-fixed-growths] initialized");
+  plugin::install();
 }

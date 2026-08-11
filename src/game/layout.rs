@@ -40,6 +40,12 @@ impl Unit {
     result[1..].copy_from_slice(&self.stats);
     result
   }
+
+  pub fn apply_level_up(&mut self, target_level: u8, stats: [u8; STAT_COUNT]) {
+    self.level = target_level;
+    self.hp = stats[0];
+    self.stats.copy_from_slice(&stats[1..]);
+  }
 }
 
 #[repr(C, align(4))]
@@ -104,6 +110,17 @@ mod tests {
     assert_eq!(offset_of!(Unit, stats), UNIT_STATS_OFFSET);
     assert_eq!(offset_of!(Unit, class_level), UNIT_CLASS_LEVEL_OFFSET);
     assert_eq!(size_of::<Unit>(), UNIT_SIZE);
+  }
+
+  #[test]
+  fn applies_level_and_all_stat_results() {
+    let mut unit = unsafe { core::mem::MaybeUninit::<Unit>::zeroed().assume_init() };
+    let stats = [31, 20, 17, 18, 22, 14, 16, 12, 7, 19];
+
+    unit.apply_level_up(12, stats);
+
+    assert_eq!(unit.level, 12);
+    assert_eq!(unit.current_stats(), stats);
   }
 
   #[test]
