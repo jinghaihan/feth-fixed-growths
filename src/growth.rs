@@ -1,5 +1,6 @@
 pub const STAT_COUNT: usize = 10;
 pub const POINTS_PER_GAIN: u32 = 100;
+pub const MOVEMENT_STAT_INDEX: usize = 8;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct GrowthStep {

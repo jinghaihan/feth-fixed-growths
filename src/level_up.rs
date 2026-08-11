@@ -1,5 +1,8 @@
 use crate::{
-  growth::{advance_to_level, initial_points_from_personal_growth, LevelUpResult, STAT_COUNT},
+  growth::{
+    advance_to_level, initial_points_from_personal_growth, LevelUpResult, MOVEMENT_STAT_INDEX,
+    STAT_COUNT,
+  },
   persistence::PersistedGrowthState,
 };
 
@@ -27,9 +30,14 @@ impl GrowthSources {
   pub fn total_growths(self) -> [i16; STAT_COUNT] {
     let mut total = [0; STAT_COUNT];
     for (stat, value) in total.iter_mut().enumerate() {
+      let ability_bonus = if stat == MOVEMENT_STAT_INDEX {
+        0
+      } else {
+        self.ability_bonus
+      };
       *value = self.personal[stat]
         .saturating_add(self.class[stat])
-        .saturating_add(self.ability_bonus);
+        .saturating_add(ability_bonus);
     }
     total
   }
@@ -98,14 +106,19 @@ mod tests {
   }
 
   #[test]
-  fn includes_the_uniform_ability_growth_bonus() {
+  fn includes_the_ability_growth_bonus_except_for_movement() {
     let decision = decide_level_up(1, 2, [10; STAT_COUNT], sources(35, 10, 20), None);
 
     let LevelUpDecision::Apply { result, state } = decision else {
       panic!("expected an applied level up");
     };
-    assert_eq!(result.gains, [1; STAT_COUNT]);
-    assert_eq!(state.accumulated_points, [0; STAT_COUNT]);
+    let mut expected_gains = [1; STAT_COUNT];
+    expected_gains[MOVEMENT_STAT_INDEX] = 0;
+    let mut expected_points = [0; STAT_COUNT];
+    expected_points[MOVEMENT_STAT_INDEX] = 80;
+
+    assert_eq!(result.gains, expected_gains);
+    assert_eq!(state.accumulated_points, expected_points);
   }
 
   #[test]
