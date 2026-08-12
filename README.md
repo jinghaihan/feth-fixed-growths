@@ -3,6 +3,7 @@
 Adds fixed growths to Fire Emblem: Three Houses.
 
 [![build](https://github.com/jinghaihan/feth-fixed-growths/actions/workflows/build.yml/badge.svg)](https://github.com/jinghaihan/feth-fixed-growths/actions/workflows/build.yml)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 > [!IMPORTANT]
 > This plugin has not yet been verified on real Nintendo Switch hardware. Back
@@ -70,9 +71,30 @@ cargo skyline build
 
 ## Credits
 
-Inspired by [My 3H Plugin](https://gamebanana.com/mods/543352) and its fixed
-growths mode.
+This is an independent implementation. The following projects inspired this
+plugin or provided public technical references; their source, documentation,
+binaries, and assets are not copied into this repository.
+
+- [My 3H Plugin](https://gamebanana.com/mods/543352) — the original inspiration
+  for a focused, standalone fixed-growths plugin.
+- [`triabolicals/fe-growths`](https://github.com/triabolicals/fe-growths) —
+  reverse-engineering reference for Fire Emblem Engage's fixed-growth
+  accumulator and personal-growth initialization.
+- [`triabolicals/fe3h`](https://github.com/triabolicals/fe3h) — public Fire
+  Emblem: Three Houses data structures, tables, and runtime function research.
+- [FEUniverse Fixed Growths Mode](https://feuniverse.us/t/fe6-fe7-fe8-fixed-growths-mode/4482)
+  — earlier accumulator-based fixed-growth implementations and discussion.
+- [Aldebaran](https://github.com/three-houses-research-team/aldebaran-rs) — Fire
+  Emblem: Three Houses runtime modding and loader research.
+- [FETH Overlays](https://github.com/3096/feth-overlays) — Fire Emblem: Three
+  Houses 1.2.0 process metadata and Build ID validation reference.
+- [`skyline-rs`](https://github.com/ultimate-research/skyline-rs) — Skyline
+  plugin runtime dependency included through Cargo under its own license.
 
 Fire Emblem and related names are trademarks of Nintendo and Intelligent
 Systems. This unofficial fan project is not affiliated with or endorsed by
 them.
+
+## License
+
+[MIT](./LICENSE) License © [jinghaihan](https://github.com/jinghaihan)
