@@ -101,7 +101,7 @@ binaries, and assets are not copied into this repository.
   for a focused, standalone fixed-growths plugin.
 - [`triabolicals/fe-growths`](https://github.com/triabolicals/fe-growths) —
   reverse-engineering reference for Fire Emblem Engage's fixed-growth
-  accumulator and personal-growth initialization.
+  accumulator update.
 - [`triabolicals/fe3h`](https://github.com/triabolicals/fe3h) — public Fire
   Emblem: Three Houses data structures, tables, and runtime function research.
 - [FEUniverse Fixed Growths Mode](https://feuniverse.us/t/fe6-fe7-fe8-fixed-growths-mode/4482)

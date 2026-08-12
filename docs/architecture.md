@@ -73,11 +73,12 @@ is frozen so that it can resume if a later cap change permits another point.
 Saint Statue maximum-stat bonuses still need hardware verification; do not
 claim exact cap parity for those bonuses before that test passes.
 
-This matches the observable fixed-growth model used by Fire Emblem Engage:
-personal growth seeds the hidden counter, then total current growth is added
-at each level. It intentionally differs from My 3H Plugin's fixed branch,
-which reverse engineering shows seeds a new state by applying one extra total
-growth step.
+Fire Emblem Engage's public fixed-growth implementation confirms that each
+level adds the current total growth to a persistent hidden counter. It does not
+expose the game's new-unit counter initialization. This plugin deliberately
+uses personal growth as that initial seed. It differs from My 3H Plugin's fixed
+branch, which reverse engineering shows seeds a new state by applying one extra
+total-growth step.
 
 ## Persistence
 
