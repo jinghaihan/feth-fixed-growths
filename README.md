@@ -14,10 +14,6 @@ Adds fixed growths to Fire Emblem: Three Houses.
 - Fire Emblem: Three Houses 1.2.0
 - Atmosphere with Skyline
 
-Aldebaran is not required. Do not run this together with My 3H Plugin's growth
-features: both hook the same level-up function and use the same unit storage
-range.
-
 ## Install
 
 1. Download `feth-fixed-growths.nro` from a successful
@@ -72,16 +68,10 @@ cargo skyline check
 cargo skyline build
 ```
 
-## Prior art
+## Credits
 
-This is an independent implementation informed by publicly documented and
-reverse-engineered behavior from these projects:
-
-- [My 3H Plugin](https://gamebanana.com/mods/543352)
-- [`triabolicals/fe3h`](https://github.com/triabolicals/fe3h)
-- [`triabolicals/fe-growths`](https://github.com/triabolicals/fe-growths)
-- [Aldebaran](https://github.com/three-houses-research-team/aldebaran-rs)
-- [FETH Overlays](https://github.com/3096/feth-overlays)
+Inspired by [My 3H Plugin](https://gamebanana.com/mods/543352) and its fixed
+growths mode.
 
 Fire Emblem and related names are trademarks of Nintendo and Intelligent
 Systems. This unofficial fan project is not affiliated with or endorsed by
