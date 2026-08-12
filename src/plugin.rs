@@ -8,7 +8,7 @@ use crate::{
 
 pub fn install() {
   if !Runtime::initialize() {
-    println!("[feth-fixed-growths] unsupported game profile; hook not installed");
+    println!("[feth-fixed-growths] unsupported or modified game profile; hook not installed");
     return;
   }
 

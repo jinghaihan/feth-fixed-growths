@@ -48,17 +48,18 @@ impl Runtime {
     if !profile::is_supported_display_version(&display_version.name) {
       return None;
     }
-    if !main_module_has_supported_build_id() {
-      return None;
-    }
 
     // SAFETY: Skyline exposes the mapped main executable text-region base for
     // the lifetime of the process. Null is rejected before constructing Self.
     let text_base = NonNull::new(unsafe {
       skyline::hooks::getRegionAddress(skyline::hooks::Region::Text).cast::<u8>()
     })?;
+    let runtime = Self { text_base };
+    if !runtime.matches_supported_profile() {
+      return None;
+    }
 
-    Some(Self { text_base })
+    Some(runtime)
   }
 
   pub fn person(self, character: i16) -> Option<NonNull<PersonData>> {
@@ -116,6 +117,15 @@ impl Runtime {
     unsafe { self.text_base.as_ptr().add(offset) }
   }
 
+  fn matches_supported_profile(self) -> bool {
+    profile::matches_text_signatures(|offset| {
+      // SAFETY: every signature offset is aligned and belongs to the mapped
+      // text region of the expected FE3H profile. The title and display
+      // version gates run before this read.
+      unsafe { self.address(offset).cast::<u32>().read_volatile() }
+    })
+  }
+
   unsafe fn fixed_table_entry<T>(
     self,
     table_offset: usize,
@@ -135,30 +145,4 @@ impl Runtime {
     let data_pointer_address = unsafe { table.add(data_pointer_offset) }.cast::<*mut T>();
     NonNull::new(unsafe { data_pointer_address.read() })
   }
-}
-
-fn main_module_has_supported_build_id() -> bool {
-  let region_starts = [
-    skyline::hooks::Region::Text,
-    skyline::hooks::Region::Rodata,
-    skyline::hooks::Region::Data,
-    skyline::hooks::Region::Bss,
-  ]
-  .map(|region| {
-    // SAFETY: Skyline returns the mapped main-module boundary for each region.
-    unsafe { skyline::hooks::getRegionAddress(region).cast::<u8>() }
-  });
-
-  region_starts.windows(2).any(|bounds| {
-    let start = bounds[0] as usize;
-    let end = bounds[1] as usize;
-    if start == 0 || end <= start {
-      return false;
-    }
-
-    // SAFETY: adjacent Skyline region boundaries describe one readable mapped
-    // main-module segment, and the ordering check prevents length underflow.
-    let region = unsafe { core::slice::from_raw_parts(bounds[0], end - start) };
-    profile::contains_supported_build_id(region)
-  })
 }

@@ -18,9 +18,11 @@ The implementation has four boundaries:
 ## Runtime flow
 
 The Skyline entry point verifies the title ID, application display version,
-and GNU Build ID before installing the hook at FE3H 1.2.0 text offset
-`0x003D3020`. The validated text base is cached once; level-up calls do not
-rescan the executable.
+and six original instructions in the FE3H 1.2.0 growth paths before installing
+the hook at text offset `0x003D3020`. The instruction signatures correspond to
+Build ID `89048449BA238C8CF565518B83BF02D3` and reject common executable patches
+that modify the same growth code. The validated text base is cached once;
+level-up calls do not repeat these checks.
 Every hook call validates its unit pointer, target level, character ID, class
 ID, data-table entries, and persistent save unit before using fixed growths.
 If any required input is unavailable, the hook calls the original game

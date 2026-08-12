@@ -6,11 +6,6 @@ pub const BUILD_ID_1_2_0: [u8; 0x20] = [
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 ];
 
-const GNU_BUILD_ID_NOTE_PREFIX: [u8; 16] = [
-  0x04, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, b'G', b'N', b'U', 0,
-];
-const ACTIVE_BUILD_ID_LENGTH: usize = 16;
-
 pub const UNIT_LEVEL_UP_OFFSET: usize = 0x003D_3020;
 pub const UNIT_ABILITY_PARAMETER_OFFSET: usize = 0x000A_7E80;
 pub const GET_UNIT_FROM_SAVE_OFFSET: usize = 0x003C_AF30;
@@ -23,6 +18,18 @@ pub const CLASS_COUNT: usize = 100;
 pub const GROWTH_BONUS_ABILITY_PARAMETER: i32 = 0x3A;
 pub const MAX_LEVEL: u8 = 99;
 
+// Original instructions in both player and enemy growth paths for FE3H 1.2.0
+// Build ID 89048449BA238C8CF565518B83BF02D3. Besides identifying the profile,
+// these reject the common "all stats +1" patches that modify the same code.
+pub const TEXT_SIGNATURES_1_2_0: [(usize, u32); 6] = [
+  (0x003D_3774, 0xF100_271F),
+  (0x003D_3830, 0x1A93_A668),
+  (0x003D_3A30, 0x1A93_A668),
+  (0x003D_43BC, 0xF100_251F),
+  (0x003D_44B8, 0x1A89_D539),
+  (0x003D_4644, 0x1A89_D539),
+];
+
 pub fn is_supported_display_version(display_version: &[u8; 16]) -> bool {
   let length = display_version
     .iter()
@@ -31,13 +38,10 @@ pub fn is_supported_display_version(display_version: &[u8; 16]) -> bool {
   &display_version[..length] == DISPLAY_VERSION_1_2_0
 }
 
-pub fn contains_supported_build_id(region: &[u8]) -> bool {
-  const NOTE_LENGTH: usize = GNU_BUILD_ID_NOTE_PREFIX.len() + ACTIVE_BUILD_ID_LENGTH;
-
-  region.windows(NOTE_LENGTH).any(|window| {
-    window[..GNU_BUILD_ID_NOTE_PREFIX.len()] == GNU_BUILD_ID_NOTE_PREFIX
-      && window[GNU_BUILD_ID_NOTE_PREFIX.len()..] == BUILD_ID_1_2_0[..ACTIVE_BUILD_ID_LENGTH]
-  })
+pub fn matches_text_signatures(instructions: impl Fn(usize) -> u32) -> bool {
+  TEXT_SIGNATURES_1_2_0
+    .iter()
+    .all(|(offset, expected)| instructions(*offset) == *expected)
 }
 
 #[cfg(test)]
@@ -57,15 +61,22 @@ mod tests {
   }
 
   #[test]
-  fn finds_the_1_2_0_gnu_build_id_note() {
-    let mut region = [0xCC; 48];
-    region[5..21].copy_from_slice(&GNU_BUILD_ID_NOTE_PREFIX);
-    region[21..37].copy_from_slice(&BUILD_ID_1_2_0[..ACTIVE_BUILD_ID_LENGTH]);
-
-    assert!(contains_supported_build_id(&region));
-
-    region[24] ^= 0xFF;
-    assert!(!contains_supported_build_id(&region));
-    assert!(!contains_supported_build_id(&region[..31]));
+  fn accepts_only_the_1_2_0_text_signatures() {
+    assert!(matches_text_signatures(|offset| {
+      TEXT_SIGNATURES_1_2_0
+        .iter()
+        .find_map(|(candidate, instruction)| (*candidate == offset).then_some(*instruction))
+        .unwrap()
+    }));
+    assert!(!matches_text_signatures(|offset| {
+      if offset == TEXT_SIGNATURES_1_2_0[3].0 {
+        0xF100_1D1F
+      } else {
+        TEXT_SIGNATURES_1_2_0
+          .iter()
+          .find_map(|(candidate, instruction)| (*candidate == offset).then_some(*instruction))
+          .unwrap()
+      }
+    }));
   }
 }
