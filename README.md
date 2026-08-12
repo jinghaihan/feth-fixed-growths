@@ -49,6 +49,27 @@ Existing high-level units begin tracking on their next level; past random
 levels are not recalculated. Removing the plugin returns future levels to the
 vanilla random system, but it does not undo stats already earned.
 
+## Early-game test reference
+
+The following results provide a quick hardware test for a new game. They
+assume that fixed-growth tracking starts at level 1, Byleth remains a
+Commoner, each house leader remains a Noble, no growth-modifying ability is
+active, no stat is capped, and every level is gained individually.
+
+Every listed stat gains one point. Stats not listed gain nothing.
+
+| Unit | Level 1 → 2 | Level 2 → 3 | Level 3 → 4 | Level 4 → 5 |
+| --- | --- | --- | --- | --- |
+| Byleth | None | HP, Str, Mag, Dex, Spd, Lck, Def, Cha | Res | HP, Str, Dex, Spd, Lck, Cha |
+| Edelgard | Str, Cha | HP, Mag, Dex, Spd, Def, Res | Str, Lck, Cha | HP, Mag, Dex, Spd, Cha |
+| Dimitri | HP, Str, Dex, Spd, Cha | Def | HP, Str, Dex, Spd, Lck, Cha | Str, Mag, Def, Res |
+| Claude | Dex, Spd, Cha | HP, Str, Lck | Mag, Dex, Spd, Def, Res, Cha | Str, Dex, Lck |
+
+Byleth's empty level 2 and large level 3 are expected. Commoner adds no class
+growths, so several equal personal growth rates cross 100 points together.
+Later class changes alter future growth totals and gradually separate many of
+these synchronized stats.
+
 ## Documentation
 
 - [Development guide](docs/development.md) — local builds, checks, artifacts,
