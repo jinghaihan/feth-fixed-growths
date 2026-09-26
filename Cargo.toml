@@ -1,6 +1,6 @@
 [package]
 name = "feth-fixed-growths"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Fixed growths for Fire Emblem: Three Houses"
 license = "MIT"
