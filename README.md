@@ -13,20 +13,50 @@ Adds fixed growths to Fire Emblem: Three Houses.
 ## Requirements
 
 - Fire Emblem: Three Houses 1.2.0
-- Atmosphere with Skyline
+- The Fire Emblem: Three Houses Skyline loader. The
+  [Aldebaran release](https://github.com/three-houses-research-team/aldebaran-rs/releases)
+  provides the game-specific `exefs` files, including `main.npdm` and `subsdk9`.
 
-## Install
+## Install on Switch
 
-1. Download `feth-fixed-growths.nro` from a successful
-   [build workflow](https://github.com/jinghaihan/feth-fixed-growths/actions/workflows/build.yml),
-   or from a release after hardware testing is complete.
-2. Copy it to:
+1. Install the FE3H 1.2.0 Skyline loader using the Aldebaran instructions.
+2. Download `feth-fixed-growths.nro` from a successful
+   [build workflow](https://github.com/jinghaihan/feth-fixed-growths/actions/workflows/build.yml)
+   or [release](https://github.com/jinghaihan/feth-fixed-growths/releases).
+3. Copy it to:
 
    ```text
    sdmc:/atmosphere/contents/010055D009F78000/romfs/skyline/plugins/feth-fixed-growths.nro
    ```
 
-3. Fully restart the game and load Fire Emblem: Three Houses 1.2.0.
+4. Fully restart the game and load Fire Emblem: Three Houses 1.2.0.
+
+## Install on Eden or Ryubing
+
+The [original plugin](https://gamebanana.com/mods/543352) reports emulator
+support through Aldebaran. This plugin has **not** yet been tested on either
+emulator. Back up your save before trying it.
+
+In both emulators, use the FE3H 1.2.0 Aldebaran loader first. Its `exefs`
+directory must end up at
+`atmosphere/contents/010055D009F78000/exefs/`, with `main.npdm` and
+`subsdk9` inside. Then put our `feth-fixed-growths.nro` at
+`atmosphere/contents/010055D009F78000/romfs/skyline/plugins/`. Merge
+directories; do not replace another plugin's files. The release ZIP contains
+our plugin, **not** the loader.
+
+- **Eden:** Open Eden's emulated SD card directory (`%AppData%\eden\sdmc` on
+  Windows). Extract the Aldebaran `sd` contents there, then extract our release
+  ZIP there or copy the `.nro` to the plugin path above. For Skyline plugins,
+  use the emulated SD card rather than **Open Mod Data Location**.
+- **Ryubing:** Right-click Fire Emblem: Three Houses and select **Open
+  Atmosphere Mods Directory**. This opens the game's
+  `sdcard/atmosphere/contents/010055D009F78000` directory. Copy Aldebaran's
+  `exefs` there and our `.nro` into its `romfs/skyline/plugins` directory.
+  Ryubing's interface may still label this menu as Ryujinx.
+
+Restart the emulator completely before starting the game. If it fails to
+launch, remove our `.nro` first to isolate the loader setup from the plugin.
 
 The plugin checks the title ID, display version, and original 1.2.0 level-up
 instructions before installing its hook. Unsupported or conflicting executable
