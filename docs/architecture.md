@@ -67,6 +67,15 @@ stat_gain = floor(points / 100)
 points = points mod 100
 ```
 
+After natural gains, every unit receives enough fallback gains to reach two
+distinct growing stats, if that many uncapped stats are available. Each
+fallback goes to the eligible stat with the highest nonnegative effective
+growth; remaining accumulated points break ties. Final ties use the fixed
+order Str, Mag, Dex, Spd, Lck, Def, Res, Mov, Cha, HP. Fallback gains do not
+spend or reset the fractional counters. The rule is applied once per level,
+including when a single hook call advances multiple levels. This universal,
+deterministic minimum is a mod rule, not a claim of exact vanilla parity.
+
 The ability bonus is omitted for Movement. Stat gains are bounded by the raw
 character cap stored in `PersonData`. If a stat is already capped, its counter
 is frozen so that it can resume if a later cap change permits another point.

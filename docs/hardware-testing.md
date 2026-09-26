@@ -31,6 +31,11 @@ Houses 1.2.0 running on a real Nintendo Switch.
   any growth ability bonus.
 - Seed each expected counter with personal growth.
 - Add the current total growth once and record every field reaching 100.
+- If fewer than two uncapped stats grew, add one point to the highest-growth
+  uncapped stats that did not already grow, breaking ties by remaining points
+  and then the fixed stat order in the architecture guide. Keep their counters
+  unchanged. Apply this rule to every character, including faculty and church
+  characters.
 - Gain exactly one level and compare all ten stored fields. Movement must not
   receive the ability growth bonus; Charm must receive it.
 

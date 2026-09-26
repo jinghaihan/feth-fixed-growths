@@ -1,6 +1,9 @@
 pub const STAT_COUNT: usize = 10;
 pub const POINTS_PER_GAIN: u32 = 100;
 pub const MOVEMENT_STAT_INDEX: usize = 8;
+// The game's tie priority puts HP last. A fixed order keeps fallback gains
+// deterministic when growth rates and accumulated points are equal.
+const FALLBACK_STAT_PRIORITY: [usize; STAT_COUNT] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct GrowthStep {
@@ -61,6 +64,27 @@ pub fn advance_level(
     );
     accumulated_points[stat] = result.remaining_points;
     gains[stat] = result.gain;
+  }
+
+  // Every unit gets at least two distinct growing stats when two uncapped
+  // stats are available. Extra gains do not consume fractional growth points.
+  while gains.iter().filter(|gain| **gain > 0).count() < 2 {
+    let mut best: Option<usize> = None;
+    for stat in FALLBACK_STAT_PRIORITY {
+      if gains[stat] > 0 || current_stats[stat] >= stat_caps[stat] {
+        continue;
+      }
+      if best.is_none_or(|previous| {
+        (growth_rates[stat].max(0), accumulated_points[stat])
+          > (growth_rates[previous].max(0), accumulated_points[previous])
+      }) {
+        best = Some(stat);
+      }
+    }
+    let Some(stat) = best else {
+      break;
+    };
+    gains[stat] = 1;
   }
 
   gains
@@ -202,6 +226,82 @@ mod tests {
   }
 
   #[test]
+  fn grants_two_distinct_stats_even_with_zero_growth() {
+    let mut points = [0; STAT_COUNT];
+    let gains = advance_level(
+      &mut points,
+      [0; STAT_COUNT],
+      [10; STAT_COUNT],
+      [99; STAT_COUNT],
+    );
+
+    assert_eq!(gains, [0, 1, 1, 0, 0, 0, 0, 0, 0, 0]);
+    assert_eq!(points, [0; STAT_COUNT]);
+  }
+
+  #[test]
+  fn tops_up_a_single_growth_by_effective_rate_without_spending_points() {
+    let mut points = [0; STAT_COUNT];
+    let growth_rates = [10, 100, 80, 90, 0, 0, 0, 0, 0, 0];
+    let gains = advance_level(
+      &mut points,
+      growth_rates,
+      [10; STAT_COUNT],
+      [99; STAT_COUNT],
+    );
+
+    assert_eq!(gains, [0, 1, 0, 1, 0, 0, 0, 0, 0, 0]);
+    assert_eq!(points, [10, 0, 80, 90, 0, 0, 0, 0, 0, 0]);
+  }
+
+  #[test]
+  fn uses_accumulated_points_then_fixed_priority_to_break_growth_ties() {
+    let mut points = [0; STAT_COUNT];
+    points[3] = 20;
+    let growth_rates = [0, 30, 30, 30, 0, 0, 0, 0, 0, 0];
+    let gains = advance_level(
+      &mut points,
+      growth_rates,
+      [10; STAT_COUNT],
+      [99; STAT_COUNT],
+    );
+
+    assert_eq!(gains, [0, 1, 0, 1, 0, 0, 0, 0, 0, 0]);
+    assert_eq!(points[3], 50);
+  }
+
+  #[test]
+  fn excludes_capped_stats_from_the_minimum() {
+    let mut points = [0; STAT_COUNT];
+    let mut caps = [10; STAT_COUNT];
+    caps[2] = 11;
+    caps[3] = 11;
+    let gains = advance_level(&mut points, [0; STAT_COUNT], [10; STAT_COUNT], caps);
+
+    assert_eq!(gains, [0, 0, 1, 1, 0, 0, 0, 0, 0, 0]);
+
+    caps[3] = 10;
+    let gains = advance_level(&mut points, [0; STAT_COUNT], [10; STAT_COUNT], caps);
+    assert_eq!(gains, [0, 0, 1, 0, 0, 0, 0, 0, 0, 0]);
+  }
+
+  #[test]
+  fn applies_the_minimum_separately_to_each_level() {
+    let mut points = [0; STAT_COUNT];
+    let result = advance_to_level(
+      1,
+      3,
+      &mut points,
+      [0; STAT_COUNT],
+      [10; STAT_COUNT],
+      [99; STAT_COUNT],
+    );
+
+    assert_eq!(result.gains, [0, 2, 2, 0, 0, 0, 0, 0, 0, 0]);
+    assert_eq!(result.stats, [10, 12, 12, 10, 10, 10, 10, 10, 10, 10]);
+  }
+
+  #[test]
   fn advances_once_for_each_new_level() {
     let mut points = [0; STAT_COUNT];
     points[0] = initial_points_from_personal_growth(35);
@@ -218,8 +318,8 @@ mod tests {
     );
 
     assert_eq!(result.levels_gained, 2);
-    assert_eq!(result.gains[0], 1);
-    assert_eq!(result.stats[0], 11);
+    assert_eq!(result.gains, [2, 2, 0, 0, 0, 0, 0, 0, 0, 0]);
+    assert_eq!(result.stats, [12, 12, 10, 10, 10, 10, 10, 10, 10, 10]);
     assert_eq!(points[0], 25);
   }
 

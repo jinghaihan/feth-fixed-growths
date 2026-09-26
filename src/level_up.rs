@@ -105,7 +105,7 @@ mod tests {
     let LevelUpDecision::Apply { result, state } = decision else {
       panic!("expected an applied level up");
     };
-    assert_eq!(result.gains, [0; STAT_COUNT]);
+    assert_eq!(result.gains, [0, 1, 1, 0, 0, 0, 0, 0, 0, 0]);
     assert_eq!(state.accumulated_points, [80; STAT_COUNT]);
   }
 
@@ -179,7 +179,7 @@ mod tests {
     let LevelUpDecision::Apply { result, state } = decision else {
       panic!("expected an applied level up");
     };
-    assert_eq!(result.gains, [0; STAT_COUNT]);
+    assert_eq!(result.gains, [0, 1, 1, 0, 0, 0, 0, 0, 0, 0]);
     assert_eq!(state.accumulated_points, [80; STAT_COUNT]);
   }
 
@@ -196,7 +196,7 @@ mod tests {
     let LevelUpDecision::Apply { result, state } = decision else {
       panic!("expected a freshly calculated level up");
     };
-    assert_eq!(result.stats, [10; STAT_COUNT]);
+    assert_eq!(result.stats, [10, 11, 11, 10, 10, 10, 10, 10, 10, 10]);
     assert_eq!(state.accumulated_points, [80; STAT_COUNT]);
   }
 }

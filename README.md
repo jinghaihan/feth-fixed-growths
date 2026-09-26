@@ -38,6 +38,10 @@ Each stat starts with growth points equal to that character's personal growth.
 On every level, the plugin adds personal growth, class growth, and applicable
 growth-skill bonuses. Every 100 points grants one stat point and leaves the
 remainder for later levels. Movement does not receive the growth-skill bonus.
+Every unit then gains at least two distinct stats per level if at least two
+uncapped stats are available. Missing gains go to the uncapped stats with the
+highest effective growth rates; accumulated points break growth-rate ties.
+Fallback gains do not consume accumulated points.
 
 Counters and the most recent level-up result are stored in
 `Unit.class_level[60..81]`, the same 21-byte range used by the reference
@@ -52,24 +56,10 @@ vanilla random system, but it does not undo stats already earned.
 
 ## Early-game test reference
 
-The following results provide a quick hardware test for a new game. They
-assume that fixed-growth tracking starts at level 1, Byleth remains a
-Commoner, each house leader remains a Noble, no growth-modifying ability is
-active, no stat is capped, and every level is gained individually.
-
-Every listed stat gains one point. Stats not listed gain nothing.
-
-| Unit | Level 1 → 2 | Level 2 → 3 | Level 3 → 4 | Level 4 → 5 |
-| --- | --- | --- | --- | --- |
-| Byleth | None | HP, Str, Mag, Dex, Spd, Lck, Def, Cha | Res | HP, Str, Dex, Spd, Lck, Cha |
-| Edelgard | Str, Cha | HP, Mag, Dex, Spd, Def, Res | Str, Lck, Cha | HP, Mag, Dex, Spd, Cha |
-| Dimitri | HP, Str, Dex, Spd, Cha | Def | HP, Str, Dex, Spd, Lck, Cha | Str, Mag, Def, Res |
-| Claude | Dex, Spd, Cha | HP, Str, Lck | Mag, Dex, Spd, Def, Res, Cha | Str, Dex, Lck |
-
-Byleth's empty level 2 and large level 3 are expected. Commoner adds no class
-growths, so several equal personal growth rates cross 100 points together.
-Later class changes alter future growth totals and gradually separate many of
-these synchronized stats.
+No unit should get an empty or single-stat level-up while at least two of its
+stats can still increase. If all effective growth rates and counters are zero,
+the fixed tie order grants Strength and Magic. A fallback gain leaves that
+stat's fractional counter unchanged, so it can also grow naturally later.
 
 ## Documentation
 
