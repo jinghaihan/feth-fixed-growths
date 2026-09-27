@@ -202,6 +202,20 @@ mod tests {
   }
 
   #[test]
+  fn does_not_apply_growths_for_a_level_one_target() {
+    let persisted = PersistedGrowthState {
+      last_target_level: 10,
+      accumulated_points: [75; STAT_COUNT],
+      cached_stats: [20; STAT_COUNT],
+    };
+
+    assert_eq!(
+      decide_level_up(10, 1, [20; STAT_COUNT], sources(50, 10, 0), Some(persisted),),
+      LevelUpDecision::NoChange,
+    );
+  }
+
+  #[test]
   fn reinitializes_points_when_saved_state_is_from_another_run() {
     let stale = PersistedGrowthState {
       last_target_level: 40,

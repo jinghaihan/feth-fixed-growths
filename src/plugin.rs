@@ -34,7 +34,6 @@ fn unit_level_up_hook(unit: *mut Unit, target_level: i32) {
 
   if target_level_byte == 1 {
     call_original!(unit.as_ptr(), target_level);
-    clear_growth_state(unit);
     return;
   }
 
@@ -45,22 +44,6 @@ fn unit_level_up_hook(unit: *mut Unit, target_level: i32) {
   }
 
   call_original!(unit.as_ptr(), target_level);
-}
-
-fn clear_growth_state(unit: NonNull<Unit>) {
-  let Some(runtime) = Runtime::get() else {
-    return;
-  };
-  // SAFETY: the hook supplied this live Unit pointer and NonNull validated it.
-  let character = unsafe { unit.as_ref().character };
-  let Some(mut save_unit) = runtime.save_unit(character) else {
-    return;
-  };
-
-  // SAFETY: save_unit returned a live persistent Unit for this character.
-  unsafe {
-    PersistedGrowthState::clear(&mut save_unit.as_mut().class_level);
-  }
 }
 
 unsafe fn try_apply_fixed_growths(mut unit: NonNull<Unit>, target_level: u8) -> bool {
