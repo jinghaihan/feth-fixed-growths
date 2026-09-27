@@ -111,8 +111,15 @@ A stored state is accepted only when:
 - it represents the current level or the target being repeated.
 
 Otherwise the state is treated as uninitialized. This provides a natural
-fallback for new runs and NG+ without adding another save marker. Save deletion
-deletes the state with the save because no external sidecar file exists.
+fallback for mismatched levels without adding another save marker. In the FE3H
+1.2.0 executable, the new-game paths at `0x00521390` rebuild the save and
+initialize all 60 units through `0x003E2800`, which clears each unit's
+`0x1DC..0x24A` range, including this plugin's `class_level[60..81]` bytes.
+New units created through `0x003D0410` clear the same range. These are static
+binary findings, not yet in-game verification. A level-1 call to the level-up
+hook is not a reliable new-run signal, so the plugin leaves saved growth state
+untouched on that path. Save deletion deletes the state with the save because
+no external sidecar file exists.
 
 The cached result makes an immediate Divine Pulse replay or another duplicate
 call for the same target deterministic. Multi-level rewind behavior still

@@ -76,9 +76,10 @@ Fallback gains do not consume accumulated points.
 Counters and the most recent level-up result are stored in
 `Unit.class_level[60..81]`, the same 21-byte range used by the reference
 plugin. No extra version marker is written. Invalid or stale state is ignored,
-and the owned range is cleared when a unit is initialized at level 1. A
-level-1 unit also always recalculates level 2 from a fresh seed, even if stale
-bytes survive a save transition.
+and the game's new-game and unit-initialization paths clear the owned range.
+The plugin does not clear saved state merely because an internal call targets
+level 1. A level-1 unit always recalculates level 2 from a fresh seed, even if
+stale bytes survive a save transition.
 
 Existing high-level units begin tracking on their next level; past random
 levels are not recalculated. Removing the plugin returns future levels to the
