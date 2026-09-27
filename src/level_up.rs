@@ -99,6 +99,41 @@ mod tests {
   }
 
   #[test]
+  fn matches_byleths_early_game_readme_reference() {
+    // HP, Str, Mag, Dex, Spd, Lck, Def, Res, Mov, Cha.
+    let sources = GrowthSources {
+      personal: [45, 45, 35, 45, 45, 45, 35, 30, 0, 45],
+      class: [0; STAT_COUNT], // Commoner.
+      ability_bonus: 0,
+      caps: [99; STAT_COUNT],
+    };
+    let expected = [
+      [0, 1, 0, 1, 0, 0, 0, 0, 0, 0],
+      [1, 1, 1, 1, 1, 1, 1, 0, 0, 1],
+      [0, 1, 0, 0, 0, 0, 0, 1, 0, 0],
+      [1, 1, 0, 1, 1, 1, 0, 0, 0, 1],
+    ];
+    let mut stats = [10; STAT_COUNT];
+    let mut persisted = None;
+
+    for (level, expected_gains) in (1..=4).zip(expected) {
+      let LevelUpDecision::Apply { result, state } =
+        decide_level_up(level, level + 1, stats, sources, persisted)
+      else {
+        panic!("expected Byleth's level-up result");
+      };
+      assert_eq!(
+        result.gains,
+        expected_gains,
+        "level {level} → {}",
+        level + 1
+      );
+      stats = result.stats;
+      persisted = Some(state);
+    }
+  }
+
+  #[test]
   fn initializes_with_personal_growth_before_the_first_level() {
     let decision = decide_level_up(1, 2, [10; STAT_COUNT], sources(35, 10, 0), None);
 

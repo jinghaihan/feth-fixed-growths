@@ -86,10 +86,25 @@ vanilla random system, but it does not undo stats already earned.
 
 ## Early-game test reference
 
-No unit should get an empty or single-stat level-up while at least two of its
-stats can still increase. If all effective growth rates and counters are zero,
-the fixed tie order grants Strength and Magic. A fallback gain leaves that
-stat's fractional counter unchanged, so it can also grow naturally later.
+For a new game with this plugin active from level 1, these are Byleth's
+expected *per-level increases*. Keep Byleth as a Commoner through level 5;
+do not equip growth-modifying abilities or reach a stat cap. Gain each level
+separately. Compare the stat changes, not Byleth's total stats. A class change
+or a save first played without the plugin will produce different results.
+
+| Level | Expected gains |
+| --- | --- |
+| 1 → 2 | Str, Dex |
+| 2 → 3 | HP, Str, Mag, Dex, Spd, Lck, Def, Cha |
+| 3 → 4 | Str, Res |
+| 4 → 5 | HP, Str, Dex, Spd, Lck, Cha |
+
+Each listed stat gains **one point**; unlisted stats do not change. Byleth's
+1 → 2 gains (Str, Dex) and 3 → 4 gains (Str, Res) include the two-stat
+minimum: those levels would otherwise have zero or only one natural gain.
+No unit should have an empty or single-stat level-up while at least two stats
+can still increase. These are predictions from the plugin's current algorithm,
+not yet hardware-verified results.
 
 ## Documentation
 
