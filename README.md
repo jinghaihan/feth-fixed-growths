@@ -5,11 +5,6 @@ Adds fixed growths to Fire Emblem: Three Houses.
 [![build](https://github.com/jinghaihan/feth-fixed-growths/actions/workflows/build.yml/badge.svg)](https://github.com/jinghaihan/feth-fixed-growths/actions/workflows/build.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-> [!IMPORTANT]
-> Back up your saves before installing this plugin. It stores fixed-growth
-> state in unused, save-backed unit fields; earned stat changes remain after
-> uninstalling it.
-
 ## Requirements
 
 - Fire Emblem: Three Houses 1.2.0
@@ -18,6 +13,8 @@ Adds fixed growths to Fire Emblem: Three Houses.
   provides the game-specific `exefs` files, including `main.npdm` and `subsdk9`.
 
 ## Install on Switch
+
+Back up your saves before installing the plugin.
 
 1. Install the FE3H 1.2.0 Skyline loader using the Aldebaran instructions.
 2. Download `feth-fixed-growths.nro` from a successful
@@ -69,7 +66,8 @@ uncapped stats are available. Missing gains go to the uncapped stats with the
 highest effective growth rates; accumulated points break growth-rate ties.
 Fallback gains do not consume accumulated points.
 
-Counters and the most recent level-up result are stored in
+Fixed-growth counters and the most recent level-up result are stored in unused,
+save-backed unit fields:
 `Unit.class_level[60..81]`, the same 21-byte range used by the reference
 plugin. No extra version marker is written. Invalid or stale state is ignored,
 and the game's new-game and unit-initialization paths clear the owned range.
