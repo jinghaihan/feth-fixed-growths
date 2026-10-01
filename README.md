@@ -6,9 +6,9 @@ Adds fixed growths to Fire Emblem: Three Houses.
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 > [!IMPORTANT]
-> This plugin has not yet been verified on real Nintendo Switch hardware. Back
-> up your saves before testing it. It stores fixed-growth state in unused,
-> save-backed unit fields; earned stat changes remain after uninstalling it.
+> Back up your saves before installing this plugin. It stores fixed-growth
+> state in unused, save-backed unit fields; earned stat changes remain after
+> uninstalling it.
 
 ## Requirements
 
@@ -32,10 +32,6 @@ Adds fixed growths to Fire Emblem: Three Houses.
 4. Fully restart the game and load Fire Emblem: Three Houses 1.2.0.
 
 ## Install on Eden or Ryubing
-
-The [original plugin](https://gamebanana.com/mods/543352) reports emulator
-support through Aldebaran. This plugin has **not** yet been tested on either
-emulator. Back up your save before trying it.
 
 In both emulators, use the FE3H 1.2.0 Aldebaran loader first. Its `exefs`
 directory must end up at
@@ -104,8 +100,7 @@ Each listed stat gains **one point**; unlisted stats do not change. Byleth's
 1 → 2 gains (Str, Dex) and 3 → 4 gains (Str, Res) include the two-stat
 minimum: those levels would otherwise have zero or only one natural gain.
 No unit should have an empty or single-stat level-up while at least two stats
-can still increase. These are predictions from the plugin's current algorithm,
-not yet hardware-verified results.
+can still increase.
 
 ## Documentation
 
@@ -113,8 +108,7 @@ not yet hardware-verified results.
   and release preparation
 - [Architecture](docs/architecture.md) — hook flow, algorithm, version profile,
   and persistence layout
-- [Hardware test plan](docs/hardware-testing.md) — the required Switch checks
-  before the first release
+- [Hardware test plan](docs/hardware-testing.md) — Switch verification checklist
 
 ## Development
 
